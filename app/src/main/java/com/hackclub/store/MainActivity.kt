@@ -65,10 +65,27 @@ import com.hackclub.store.ui.theme.HackStoreTheme
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import java.io.File
+import java.net.URI
 
 @Serializable
-data class App(val name : String, val author: String, val description: String)
+data class App(val name : String, val author: String, val description: String, val tags: List<String> = listOf("None")){
+    fun searchQuery(query: String): Boolean {
+        val matches = listOf(
+            "$name",
+            "$name $author",
+            "$name$author",
+            "$author",
+            "$author $name",
+            "$description"
 
+        )
+        return matches.any {
+            it.contains(query, ignoreCase = true)
+        }
+    }
+}
+
+data class User(val name: String, val pfp: URI)
 
 @Serializable
 object AppsScreen
@@ -112,7 +129,7 @@ class MainActivity : ComponentActivity() {
                     ){
                         composable<AppsScreen>{
 
-                            AppsScreen(apps = apps, nav = navController)
+                            AppsScreen(app = apps, nav = navController, login = false, user = null)
                         }
                         composable<CreateAppScreen> {
                             AddAppScreen(nav = navController)

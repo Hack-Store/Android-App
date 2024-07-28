@@ -57,6 +57,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
     val navversion = "2.8.0-alpha08"
+    implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("com.google.firebase:firebase-appcheck")
     implementation("androidx.navigation:navigation-compose:$navversion")
