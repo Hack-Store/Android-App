@@ -46,6 +46,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImage
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.serialization.json.Json.Default.configuration
@@ -123,7 +124,7 @@ fun SearchBar(apps: MutableState<List<App>>, allapps: List<App>, nav: NavHostCon
         }
     }
 
-    apps.value = temp
+        apps.value = temp
 
         TextField(value = searchQuery.value,
             onValueChange ={searchQuery.value = it
@@ -270,8 +271,8 @@ fun Single(app: App) {
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(
-                    painter = painterResource(R.drawable.icon_rounded),
+                AsyncImage(
+                    model = app.image,
                     contentDescription = "App icon",
                     modifier = Modifier
                         .size(40.dp)
@@ -293,6 +294,10 @@ fun Single(app: App) {
                 Text(
                     text = app.description,
                     style = MaterialTheme.typography.bodyMedium
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = app.tags.toString()
                 )
             }
 

@@ -68,7 +68,7 @@ import java.io.File
 import java.net.URI
 
 @Serializable
-data class App(val name : String, val author: String, val description: String, val tags: List<String> = listOf("None")){
+data class App(val name : String, val author: String, val description: String, val tags: List<String> = listOf("None"), var image:String = "https://cloud-7ylc7akmc-hack-club-bot.vercel.app/0image.png"){
     fun searchQuery(query: String): Boolean {
         val matches = listOf(
             "$name",
@@ -105,39 +105,92 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
 
         super.onCreate(savedInstanceState)
+        val storageRef = Firebase.storage.reference
+
+
+
+
         database = Firebase.database.reference
         var apps: List<App> = listOf()
         database.child("Apps").get().addOnSuccessListener {
             Log.i("firebase", "Got value ${it.value}")
             var data = it.value as Map<Any, Any>
+             var imageurl: String? = null
             for(entry in data.entries.iterator()){
-                Log.i("Database Key", entry.key.toString())
-                Log.i("Database Value", entry.value.toString())
-                var value = entry.value as Map<Any, Any>
-                Log.i("Author", value["Author"].toString())
-                var app = App(entry.key.toString(),value["Author"].toString(),value["Description"].toString())
-                apps = apps + app
-            }
-            Log.i("APPS", apps.toString())
+                storageRef.child("${entry.key.toString()}/icon.png").downloadUrl.addOnSuccessListener { uri ->
 
-            setContent {
-                HackStoreTheme {
-                    val navController = rememberNavController()
-                    NavHost(
-                        navController = navController,
-                        startDestination = AppsScreen
-                    ){
-                        composable<AppsScreen>{
+                    Log.i("firebase storage", "suces + ${uri.toString()}")
 
-                            AppsScreen(app = apps, nav = navController, login = false, user = null)
+                    Log.i("Database Key", entry.key.toString())
+                    Log.i("Database Value", entry.value.toString())
+                    var value = entry.value as Map<Any, Any>
+                    Log.i("Author", value["Author"].toString())
+                    var tags = value["Tags"].toString().split(",")
+                    var app = App(entry.key.toString(),value["Author"].toString(),value["Description"].toString(),tags)
+                    imageurl = uri.toString()
+                        Log.i("added", "image")
+                        app.image = imageurl as String
+
+                    apps = apps + app
+                    setContent {
+                        HackStoreTheme {
+                            val navController = rememberNavController()
+                            NavHost(
+                                navController = navController,
+                                startDestination = AppsScreen
+                            ){
+                                composable<AppsScreen>{
+
+                                    AppsScreen(app = apps, nav = navController, login = false, user = null)
+                                }
+                                composable<CreateAppScreen> {
+                                    AddAppScreen(nav = navController)
+                                }
+                            }
                         }
-                        composable<CreateAppScreen> {
-                            AddAppScreen(nav = navController)
-                        }
+
                     }
+
+
+                }.addOnFailureListener {
+                    // Handle any errors
+
+
+                    Log.i("Database Key", entry.key.toString())
+                    Log.i("Database Value", entry.value.toString())
+                    var value = entry.value as Map<Any, Any>
+                    Log.i("Author", value["Author"].toString())
+                    var tags = value["Tags"].toString().split(",")
+                    var app = App(entry.key.toString(),value["Author"].toString(),value["Description"].toString(),tags)
+
+                    Log.i("added", "image")
+
+
+                    apps = apps + app
+                    setContent {
+                        HackStoreTheme {
+                            val navController = rememberNavController()
+                            NavHost(
+                                navController = navController,
+                                startDestination = AppsScreen
+                            ){
+                                composable<AppsScreen>{
+
+                                    AppsScreen(app = apps, nav = navController, login = false, user = null)
+                                }
+                                composable<CreateAppScreen> {
+                                    AddAppScreen(nav = navController)
+                                }
+                            }
+                        }
+
+                    }
+
                 }
 
             }
+            Log.i("APPS", apps.toString())
+
 
         }.addOnFailureListener{
             Log.e("firebase", "Error getting data", it)
